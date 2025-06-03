@@ -1,19 +1,27 @@
 import pygame
 from constants import *
 
-# Dummy CircleShape class if not provided (comment this out if you have it already)
-class CircleShape:
+class CircleShape(pygame.sprite.Sprite):
     def __init__(self, x, y, radius):
+        super().__init__()
         self.position = pygame.Vector2(x, y)
         self.radius = radius
 
     def draw(self, screen):
         pygame.draw.circle(screen, "white", self.position, self.radius, 2)
+        
+    def collides_with(self, other):
+        return self.position.distance_to(other.position) <= self.radius + other.radius
 
 class Player(CircleShape):
+    containers = ()
+
     def __init__(self, x, y):
         super().__init__(x, y, PLAYER_RADIUS)
         self.rotation = 0
+
+        for group in Player.containers:
+            group.add(self)
 
     def triangle(self):
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
@@ -28,7 +36,7 @@ class Player(CircleShape):
 
     def rotate(self, dt):
         self.rotation += PLAYER_TURN_SPEED * dt
-    
+
     def move(self, dt):
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
         self.position += forward * PLAYER_SPEED * dt
